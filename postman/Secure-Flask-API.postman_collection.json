@@ -1,0 +1,101 @@
+{
+  "info": {
+    "_postman_id": "da837783-3e72-4a35-a95d-8e21e8937a43",
+    "name": "Secure Flask API",
+    "description": "Requests for the secure REST API lab. Run Login first; its test script saves the JWT into accessToken.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Health",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/health"
+      }
+    },
+    {
+      "name": "Login",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Login succeeded', function () { pm.response.to.have.status(200); });",
+              "const body = pm.response.json();",
+              "if (body.access_token) { pm.collectionVariables.set('accessToken', body.access_token); }"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {"key": "Content-Type", "value": "application/json"}
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"login\": \"{{login}}\",\n  \"password\": \"{{password}}\"\n}"
+        },
+        "url": "{{baseUrl}}/auth/login"
+      }
+    },
+    {
+      "name": "Get data without token (expect 401)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Missing token is denied', function () { pm.response.to.have.status(401); });"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/data"
+      }
+    },
+    {
+      "name": "Get protected data",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [{"key": "token", "value": "{{accessToken}}", "type": "string"}]
+        },
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/data"
+      }
+    },
+    {
+      "name": "Create post",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [{"key": "token", "value": "{{accessToken}}", "type": "string"}]
+        },
+        "method": "POST",
+        "header": [
+          {"key": "Content-Type", "value": "application/json"}
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"My first post\",\n  \"content\": \"A safe API response\"\n}"
+        },
+        "url": "{{baseUrl}}/api/posts"
+      }
+    }
+  ],
+  "variable": [
+    {"key": "baseUrl", "value": "http://127.0.0.1:5000", "type": "string"},
+    {"key": "login", "value": "alice", "type": "string"},
+    {"key": "password", "value": "", "type": "secret"},
+    {"key": "accessToken", "value": "", "type": "secret"}
+  ]
+}
+
