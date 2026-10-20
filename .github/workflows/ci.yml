@@ -40,7 +40,7 @@ jobs:
 
       - name: Upload Bandit report
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@v4
         with:
           name: bandit-sast-report
           path: reports/bandit-report.html
@@ -84,14 +84,14 @@ jobs:
           project: secure-flask-api
           path: .
           format: HTML
-          out: reports/dependency-check
           args: >-
             --enableExperimental
             --failOnCVSS 7
+            --out reports/dependency-check
 
       - name: Upload SCA reports
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@v4
         with:
           name: sca-reports
           path: |
