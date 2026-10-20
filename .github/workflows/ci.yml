@@ -1,3 +1,4 @@
+
 name: Secure API CI
 
 on:
@@ -25,18 +26,25 @@ jobs:
           cache: pip
 
       - name: Install dependencies
+        id: install_dependencies
         run: |
           python -m pip install --upgrade pip
           python -m pip install -r requirements-dev.txt
 
-      - name: Run automated tests
-        run: python -m pytest --cov=app --cov-report=term-missing --cov-fail-under=85
-
       - name: Create report directory
         run: mkdir -p reports
 
-      - name: Run Bandit SAST
-        run: bandit -r app -f html -o reports/bandit-report.html
+      - name: Run automated tests
+        run: python -m pytest --cov=app --cov-report=term-missing --cov-fail-under=85
+
+      - name: Run Bandit SAST - Console Output
+        run: bandit -r app -f txt
+
+      - name: Generate Bandit HTML report
+        if: ${{ always() && steps.install_dependencies.outcome == 'success' }}
+        run: |
+          mkdir -p reports
+          bandit -r app -f html -o reports/bandit-report.html
 
       - name: Upload Bandit report
         if: always()
@@ -79,7 +87,7 @@ jobs:
       - name: Run OWASP Dependency-Check
         id: dependency_check
         continue-on-error: true
-        uses: dependency-check/Dependency-Check_Action@75ba02d6183445fe0761d26e836bde58b1560600 # 1.1.0
+        uses: dependency-check/Dependency-Check_Action@75ba02d6183445fe0761d26e836bde58b1560600
         with:
           project: secure-flask-api
           path: .
