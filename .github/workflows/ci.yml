@@ -44,7 +44,18 @@ jobs:
         if: ${{ always() && steps.install_dependencies.outcome == 'success' }}
         run: |
           mkdir -p reports
-          bandit -r app -f html -o reports/bandit-report.html
+          
+          bandit -r app \
+            --severity-level all \
+            --confidence-level all \
+            -n 10 \
+            -f json \
+            -o reports/bandit-raw.json \
+            --exit-zero
+          
+          python scripts/generate_bandit_report.py \
+            reports/bandit-raw.json \
+            reports/bandit-report.html
 
       - name: Upload Bandit report
         if: always()
